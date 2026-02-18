@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import BreathingBubble from "@/components/BreathingBubble";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { getUserId } from "../lib/auth";
+import { saveBreathingSession } from "../lib/db";
 
 const TOTAL_SECONDS = 120;
 
@@ -22,9 +24,22 @@ const Index = () => {
     setRemaining(TOTAL_SECONDS);
   }, []);
 
-  const handleDone = useCallback(() => {
+  const handleDone = useCallback(async () => {
+    const userId = getUserId();
+    if (userId) {
+      try {
+        await saveBreathingSession(userId, {
+          started_at: new Date(Date.now() - (TOTAL_SECONDS - remaining) * 1000).toISOString(),
+          technique: 'calm',
+          duration_min: Math.round((TOTAL_SECONDS - remaining) / 60),
+          completed: true
+        });
+      } catch (error) {
+        console.error("Failed to save breathing session:", error);
+      }
+    }
     setStage("complete");
-  }, []);
+  }, [remaining]);
 
   const handleSkip = useCallback(() => {
     setStage("complete");
