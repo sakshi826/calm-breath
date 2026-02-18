@@ -1,4 +1,4 @@
-name: Deploy to Production
+﻿name: Deploy to Production
 
 on:
   push:
@@ -23,8 +23,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: bunker.mantracare.com/
+          tags: bunker.mantracare.com/calm-breath:1.0
           build-args: |
             VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
             VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
