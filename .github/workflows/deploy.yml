@@ -7,29 +7,23 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 0
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Bunker Registry
-        run: |
-          echo "Logging in to bunker.mantracare.com..."
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login bunker.mantracare.com -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-          echo "Login exit code: $?"
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login bunker.mantracare.com -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
         run: |
-          echo "Building image: bunker.mantracare.com/calm-breath:1.0"
           docker build \
             --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" \
             --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
             -t "bunker.mantracare.com/calm-breath:1.0" \
-            --progress=plain \
             .
-          echo "Build exit code: $?"
 
       - name: Push Docker Image
-        run: |
-          echo "Pushing image: bunker.mantracare.com/calm-breath:1.0"
-          docker push "bunker.mantracare.com/calm-breath:1.0"
-          echo "Push exit code: $?"
+        run: docker push "bunker.mantracare.com/calm-breath:1.0"
