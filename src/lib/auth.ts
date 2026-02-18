@@ -1,20 +1,21 @@
-const USER_ID_KEY = 'wellness_user_id';
+ï»¿const USER_ID_KEY = 'wellness_user_id';
 
 export async function resolveUser(): Promise<number | null> {
-  // 1. Check sessionStorage first (already resolved this tab)
   const stored = sessionStorage.getItem(USER_ID_KEY);
   if (stored) return parseInt(stored, 10);
 
-  // 2. Check URL for token param
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
 
   if (!token) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('Local dev detected, using dummy user_id');
+      return 12345;
+    }
     window.location.href = '/token';
     return null;
   }
 
-  // 3. Validate token with external API
   try {
     const response = await fetch('https://api.mantracare.com/user/user-info', {
       method: 'POST',
@@ -27,10 +28,8 @@ export async function resolveUser(): Promise<number | null> {
     const data = await response.json();
     const userId: number = data.user_id;
 
-    // 4. Store in sessionStorage (tab-scoped only)
     sessionStorage.setItem(USER_ID_KEY, String(userId));
 
-    // 5. Clean URL — remove token from address bar
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
 

@@ -6,7 +6,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
+        console.log('AuthGate: resolving user...');
         resolveUser().then(async (id) => {
+            console.log('AuthGate: resolved id:', id);
             if (id !== null) {
                 try {
                     await upsertUser(id);
@@ -15,7 +17,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
                     console.error('Failed to upsert user:', error);
                     setReady(true);
                 }
+            } else {
+                console.warn('AuthGate: No user ID resolved. Redirecting or stuck.');
             }
+        }).catch(err => {
+            console.error('AuthGate: Error resolving user:', err);
         });
     }, []);
 
