@@ -6,23 +6,38 @@ export function AuthGate({ children }: { children: ReactNode }) {
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
-        console.log('AuthGate: resolving user...');
+        let mounted = true;
+        console.log('AuthGate: Starting verification for breath...');
+
+        // 3-second safety timeout to prevent infinite blank screen
+        const timer = setTimeout(() => {
+            if (mounted && !ready) {
+                console.warn('AuthGate: Verification timed out. Falling back to Guest mode.');
+                setReady(true);
+            }
+        }, 3000);
+
         resolveUser().then(async (id) => {
-            console.log('AuthGate: resolved id:', id);
+            if (!mounted) return;
+            console.log('AuthGate: Resolved ID:', id);
+            
             if (id !== null) {
                 try {
                     await upsertUser(id);
-                    setReady(true);
                 } catch (error) {
-                    console.error('Failed to upsert user:', error);
-                    setReady(true);
+                    console.error('AuthGate: DB error:', error);
                 }
-            } else {
-                console.warn('AuthGate: No user ID resolved. Redirecting or stuck.');
             }
+            clearTimeout(timer);
+            setReady(true);
         }).catch(err => {
-            console.error('AuthGate: Error resolving user:', err);
+            if (!mounted) return;
+            console.error('AuthGate: Auth error:', err);
+            clearTimeout(timer);
+            setReady(true); // Fallback to allow app to load
         });
+
+        return () => { mounted = false; clearTimeout(timer); };
     }, []);
 
     if (!ready) {
@@ -32,7 +47,10 @@ export function AuthGate({ children }: { children: ReactNode }) {
                 minHeight: '100svh', background: '#F5F7FA',
                 fontFamily: "'Sora', sans-serif", fontSize: '15px', color: '#7A8FA6'
             }}>
-                Verifying session...
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ marginBottom: '10px' }}>Syncing session...</div>
+                    <div style={{ fontSize: '12px', opacity: 0.6 }}>This won't take long</div>
+                </div>
             </div>
         );
     }

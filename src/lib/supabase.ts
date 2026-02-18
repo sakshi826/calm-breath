@@ -1,18 +1,22 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string;
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('Supabase credentials missing. Data features will be disabled.');
+}
 
-/**
- * Sets the RLS user context for the current request chain.
- * Must be called before any data operation.
- */
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseKey || 'placeholder'
+);
+
 export async function setUserContext(userId: number): Promise<void> {
+  if (!supabaseUrl) return;
   await supabase.rpc('set_config', {
-    setting_name:  'app.current_user_id',
+    setting_name: 'app.current_user_id',
     setting_value: String(userId),
-    is_local:      true,
+    is_local: true,
   });
 }
