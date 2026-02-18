@@ -12,17 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install crane
-        run: |
-          curl -sL https://github.com/google/go-containerregistry/releases/download/v0.19.1/go-containerregistry_Linux_x86_64.tar.gz | tar xz crane
-          sudo mv crane /usr/local/bin/
+      - name: Login to Bunker Registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login bunker.mantracare.com -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
         env:
           DOCKER_BUILDKIT: 0
-        run: docker build --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" -t "bunker.mantracare.com/calm-breath:1.0" .
+        run: docker build --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" -t "bunker.mantracare.com/lovable/calm-breath:1.0" .
 
-      - name: Login and Push via crane
-        run: |
-          crane auth login bunker.mantracare.com -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}"
-          docker save "bunker.mantracare.com/calm-breath:1.0" | crane push - "bunker.mantracare.com/calm-breath:1.0"
+      - name: Push Docker Image
+        run: docker push "bunker.mantracare.com/lovable/calm-breath:1.0"
