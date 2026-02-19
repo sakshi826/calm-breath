@@ -4,40 +4,46 @@ import { upsertUser } from '../lib/db';
 
 export function AuthGate({ children }: { children: ReactNode }) {
     const [ready, setReady] = useState(false);
+    const [status, setStatus] = useState('Verifying session...');
 
     useEffect(() => {
-        let mounted = true;
-        console.log('AuthGate: Starting verification for breath...');
+        let isMounted = true;
+        console.log('AuthGate: Initializing...');
 
-        // 3-second safety timeout to prevent infinite blank screen
-        const timer = setTimeout(() => {
-            if (mounted && !ready) {
-                console.warn('AuthGate: Verification timed out. Falling back to Guest mode.');
+        // 3-second safety timeout: If auth takes too long, proceed as guest
+        const timeoutId = setTimeout(() => {
+            if (isMounted && !ready) {
+                console.warn('AuthGate: Auth check timed out. Proceeding in Guest Mode.');
                 setReady(true);
             }
         }, 3000);
 
-        resolveUser().then(async (id) => {
-            if (!mounted) return;
-            console.log('AuthGate: Resolved ID:', id);
-            
-            if (id !== null) {
-                try {
-                    await upsertUser(id);
-                } catch (error) {
-                    console.error('AuthGate: DB error:', error);
+        resolveUser()
+            .then(async (userId) => {
+                if (!isMounted) return;
+                
+                if (userId) {
+                    try {
+                        setStatus('Syncing data...');
+                        await upsertUser(userId);
+                    } catch (err) {
+                        console.error('AuthGate: Failed to upsert user, proceeding anyway:', err);
+                    }
+                } else {
+                    console.log('AuthGate: No user found, proceeding as guest.');
                 }
-            }
-            clearTimeout(timer);
-            setReady(true);
-        }).catch(err => {
-            if (!mounted) return;
-            console.error('AuthGate: Auth error:', err);
-            clearTimeout(timer);
-            setReady(true); // Fallback to allow app to load
-        });
+                
+                clearTimeout(timeoutId);
+                setReady(true);
+            })
+            .catch((err) => {
+                if (!isMounted) return;
+                console.error('AuthGate: Error resolving user:', err);
+                clearTimeout(timeoutId);
+                setReady(true); // Always proceed to avoid blank screen
+            });
 
-        return () => { mounted = false; clearTimeout(timer); };
+        return () => { isMounted = false; clearTimeout(timeoutId); };
     }, []);
 
     if (!ready) {
@@ -48,8 +54,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
                 fontFamily: "'Sora', sans-serif", fontSize: '15px', color: '#7A8FA6'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ marginBottom: '10px' }}>Syncing session...</div>
-                    <div style={{ fontSize: '12px', opacity: 0.6 }}>This won't take long</div>
+                    <div style={{ marginBottom: '12px' }}>{status}</div>
+                    <div style={{ fontSize: '12px', opacity: 0.7 }}>Almost there</div>
                 </div>
             </div>
         );

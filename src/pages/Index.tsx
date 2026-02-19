@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import BreathingBubble from "@/components/BreathingBubble";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Play, RefreshCw } from "lucide-react";
