@@ -10,7 +10,8 @@ COPY . .
 RUN npm run build
 
 FROM nginx:stable-alpine
-COPY --from=builder /app/dist /usr/share/nginx/html/app/calm-breath
+COPY --from=builder /app/dist /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/app/calm-breath && cp -r /usr/share/nginx/html/* /usr/share/nginx/html/app/calm-breath/
 COPY vite-nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
