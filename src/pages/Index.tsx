@@ -2,7 +2,7 @@
 import BreathingBubble from "@/components/BreathingBubble";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Play, RefreshCw } from "lucide-react";
-import { getUserId } from "../lib/auth";
+
 import { saveBreathingSession } from "../lib/db";
 
 const TOTAL_SECONDS = 120; // 2 minutes
