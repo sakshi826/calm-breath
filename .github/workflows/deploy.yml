@@ -7,18 +7,27 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Bunker Registry
-        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login bunker.mantracare.com -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: bunker.mantracare.com
+          username: ${{ secrets.BUNKER_USERNAME }}
+          password: ${{ secrets.BUNKER_PASSWORD }}
 
       - name: Build Docker Image
-        env:
-          DOCKER_BUILDKIT: 0
-        run: docker build --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" -t "bunker.mantracare.com/lovable/.0" .
+        run: |
+          docker build \
+            --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" \
+            --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -t "bunker.mantracare.com/lovable/.0" .
 
       - name: Push Docker Image
-        run: docker push "bunker.mantracare.com/lovable/.0"
+        run: |
+          docker push "bunker.mantracare.com/lovable/.0"
+
+      - name: Notify Done
+        run: echo "Deployment complete for calm-breath version 1.0"
