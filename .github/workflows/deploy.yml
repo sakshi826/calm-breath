@@ -18,7 +18,7 @@ jobs:
       - name: Build Docker Image
         env:
           DOCKER_BUILDKIT: 0
-        run: docker build --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" -t "bunker.mantracare.com/lovable/calm-breath:1.0" .
+        run: docker build --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" -t "bunker.mantracare.com/lovable/.0" .
 
       - name: Push Docker Image
-        run: docker push "bunker.mantracare.com/lovable/calm-breath:1.0"
+        run: docker push "bunker.mantracare.com/lovable/.0"
