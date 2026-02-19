@@ -7,11 +7,20 @@ export async function resolveUser(): Promise<number | null> {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
 
+  const isLocal = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' || 
+                  window.location.hostname.startsWith('192.168.') ||
+                  window.location.hostname.startsWith('10.') ||
+                  window.location.hostname.includes('.local');
+
   if (!token) {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('Local dev detected, using dummy user_id');
-      return 12345;
+    if (isLocal) {
+      console.log('Auth: Local dev detected, using dummy user_id');
+      const dummyId = 12345;
+      sessionStorage.setItem(USER_ID_KEY, String(dummyId));
+      return dummyId;
     }
+    console.warn('Auth: No token found and not on local dev. Redirecting to /token');
     window.location.href = '/token';
     return null;
   }
@@ -34,7 +43,9 @@ export async function resolveUser(): Promise<number | null> {
     window.history.replaceState({}, document.title, cleanUrl);
 
     return userId;
-  } catch {
+  } catch (err) {
+    console.error('Auth: fetch failed:', err);
+    if (isLocal) return 12345;
     window.location.href = '/token';
     return null;
   }

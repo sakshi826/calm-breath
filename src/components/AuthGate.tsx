@@ -8,54 +8,53 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         let isMounted = true;
-        console.log('AuthGate: Initializing...');
+        console.log('AuthGate: Starting verification flow...');
 
-        // 3-second safety timeout: If auth takes too long, proceed as guest
         const timeoutId = setTimeout(() => {
             if (isMounted && !ready) {
-                console.warn('AuthGate: Auth check timed out. Proceeding in Guest Mode.');
+                console.warn('AuthGate: Safety timeout reached. Forcing ready state.');
                 setReady(true);
             }
         }, 3000);
 
-        resolveUser()
-            .then(async (userId) => {
+        const checkAuth = async () => {
+            try {
+                const userId = await resolveUser();
                 if (!isMounted) return;
                 
                 if (userId) {
-                    try {
-                        setStatus('Syncing data...');
-                        await upsertUser(userId);
-                    } catch (err) {
-                        console.error('AuthGate: Failed to upsert user, proceeding anyway:', err);
-                    }
+                    console.log('AuthGate: User verified:', userId);
+                    setStatus('Syncing with database...');
+                    await upsertUser(userId);
                 } else {
-                    console.log('AuthGate: No user found, proceeding as guest.');
+                    console.log('AuthGate: Proceeding as unauthenticated guest');
                 }
-                
-                clearTimeout(timeoutId);
-                setReady(true);
-            })
-            .catch((err) => {
-                if (!isMounted) return;
-                console.error('AuthGate: Error resolving user:', err);
-                clearTimeout(timeoutId);
-                setReady(true); // Always proceed to avoid blank screen
-            });
+            } catch (err) {
+                console.error('AuthGate: Error during auth flow:', err);
+            } finally {
+                if (isMounted) {
+                    clearTimeout(timeoutId);
+                    setReady(true);
+                    console.log('AuthGate: Ready');
+                }
+            }
+        };
+
+        checkAuth();
 
         return () => { isMounted = false; clearTimeout(timeoutId); };
     }, []);
 
     if (!ready) {
         return (
-            <div style={{
+            <div id="auth-loading-overlay" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 minHeight: '100svh', background: '#F5F7FA',
                 fontFamily: "'Sora', sans-serif", fontSize: '15px', color: '#7A8FA6'
             }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ marginBottom: '12px' }}>{status}</div>
-                    <div style={{ fontSize: '12px', opacity: 0.7 }}>Almost there</div>
+                    <div style={{ fontSize: '12px', opacity: 0.7 }}>Please wait a moment</div>
                 </div>
             </div>
         );

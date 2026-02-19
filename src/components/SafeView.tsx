@@ -41,7 +41,7 @@ export class SafeView extends Component<Props, State> {
           <p style={{ color: '#666', marginBottom: '20px' }}>
             We've encountered an unexpected error, but we're working on it.
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             style={{
               padding: '10px 20px',
@@ -63,6 +63,6 @@ export class SafeView extends Component<Props, State> {
       );
     }
 
-    return this.children;
+    return this.props.children;
   }
 }
