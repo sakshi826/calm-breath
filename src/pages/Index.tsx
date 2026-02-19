@@ -93,7 +93,7 @@ const Index = () => {
             onClick={() => setIsActive(true)}
             className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl hover:shadow-primary/20 transition-all hover:-translate-y-1 group"
           >
-            <Play className="mr-2 h-6 w-6 fill-current" />
+            <Play className="mr-2 h-6 w-6 fill-current"/>
             {remaining < TOTAL_SECONDS ? "Resume" : "Start Session"}
           </Button>
         ) : (
@@ -114,7 +114,7 @@ const Index = () => {
             onClick={handleReset}
             className="h-16 w-16 rounded-full hover:bg-muted"
           >
-            <RefreshCw className="h-6 w-6" />
+            <RefreshCw className="h-6 w-6"/>
           </Button>
         )}
       </div>

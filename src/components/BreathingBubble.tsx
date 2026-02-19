@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 type Phase = "inhale" | "hold" | "exhale";
 
@@ -60,7 +60,7 @@ const BreathingBubble = ({ isActive }: BreathingBubbleProps) => {
         `}
       >
         {/* Inner glow */}
-        <div className="absolute inset-4 rounded-full bg-white/10 backdrop-blur-sm" />
+        <div className="absolute inset-4 rounded-full bg-white/10 backdrop-blur-sm"/>
         
         <span className="relative z-10 text-primary-foreground text-lg font-medium tracking-wide select-none">
           {isActive ? PHASE_LABELS[phase] : "Ready"}
