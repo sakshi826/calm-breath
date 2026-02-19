@@ -13,9 +13,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/app">
+      <BrowserRouter>
         <Routes>
-          <Route path="/calm-breath" element={<Index />} />
+          
                     
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
